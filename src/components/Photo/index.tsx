@@ -7,4 +7,3 @@ type Props = {
 export function Photo({ uri }: Props) {
   return uri ? <Image source={{ uri }} /> : <PlaceholderImage />
 }
-parei no minuto 21: 14 modulo03 - parte01

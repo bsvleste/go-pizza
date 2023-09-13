@@ -1,9 +1,24 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Platform, TouchableOpacity } from 'react-native'
 import * as S from './styles'
 import { ButtonBack } from '@components/ButtonBack';
 import { Photo } from '@components/Photo';
+import * as ImagePicker from 'expo-image-picker';
+
 export function Product() {
+  const [image, setImage] = useState("")
+  async function handlerPickerImage() {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status === "granted") {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        aspect: [4, 4]
+      })
+      if (!result.canceled) {
+        setImage(result.assets[0].uri)
+      }
+    }
+  }
   return (
     <S.Container behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <S.Header>
@@ -13,9 +28,10 @@ export function Product() {
           <S.DeleteLabel>Deletar</S.DeleteLabel>
         </TouchableOpacity>
       </S.Header>
-      <View>
-        <Photo uri="https://github.com/bsvleste.png" />
-      </View>
+      <S.Upload>
+        <Photo uri={image} />
+        <S.PickImageButton title='Carregar' type='SECONDARY' onPress={handlerPickerImage} />
+      </S.Upload>
     </S.Container>
   );
 }
