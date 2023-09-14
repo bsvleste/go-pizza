@@ -5,7 +5,17 @@ import * as S from './styles'
 import { MaterialIcons } from '@expo/vector-icons';
 import { useAuth } from "@hooks/auth";
 import { Search } from "@components/Search";
+import smille from '@assets/happy.png'
+import { ProductCard } from "@components/ProductCard";
+import { ScrollView } from "react-native-gesture-handler";
 
+
+const data = {
+  id: '1',
+  description: "olalal",
+  name: "Margherita",
+  photo_url: 'https://github.com/bsvleste.png',
+}
 export function Home() {
   const { signOut } = useAuth()
 
@@ -13,33 +23,22 @@ export function Home() {
     <S.Container>
       <S.Header>
         <S.Greeting>
-          <S.GreetinEmoji>😁</S.GreetinEmoji>
+          <S.GreetinEmoji source={smille} />
           <S.GreetingText>Olá, Admin</S.GreetingText>
         </S.Greeting>
-        <TouchableOpacity onPress={() => signOut()}>
+        <TouchableOpacity onPress={() => signOut()} style={{ alignItems: 'flex-end' }}>
           <MaterialIcons name="logout" size={24} color="white" />
         </TouchableOpacity>
       </S.Header>
       <Search onSearch={() => { }} onClear={() => { }} />
+      <S.MenuHeader>
+        <S.MenuTitle>Cardapio</S.MenuTitle>
+        <S.MenuItemsNumber>32 pizzas</S.MenuItemsNumber>
+      </S.MenuHeader>
+      <ScrollView>
+        <ProductCard data={data} />
+      </ScrollView>
     </S.Container>
-
   )
 }
 
-{/* <Container>
-      <S.HeaderHome>
-        <S.WrapperTitle>
-          <S.SmalleTitle>😁</S.SmalleTitle>
-          <S.Title>Olá, Garçom</S.Title>
-        </S.WrapperTitle>
-        <TouchableOpacity onPress={() => signOut()}>
-          <MaterialIcons name="logout" size={24} color="white" />
-        </TouchableOpacity>
-      </S.HeaderHome>
-      <S.WrapperSearch>
-        <S.SearchPizza placeholder="Busque pela pizza" />
-        <S.ButtonSearch>
-          <MaterialIcons name="search" size={24} color="white" />
-        </S.ButtonSearch>
-      </S.WrapperSearch>
-    </Container> */}
