@@ -4,12 +4,29 @@ import { TextInput, View, TouchableOpacity } from "react-native";
 import * as S from './styles'
 import { MaterialIcons } from '@expo/vector-icons';
 import { useAuth } from "@hooks/auth";
+import { Search } from "@components/Search";
 
 export function Home() {
   const { signOut } = useAuth()
 
   return (
-    <Container>
+    <S.Container>
+      <S.Header>
+        <S.Greeting>
+          <S.GreetinEmoji>😁</S.GreetinEmoji>
+          <S.GreetingText>Olá, Admin</S.GreetingText>
+        </S.Greeting>
+        <TouchableOpacity onPress={() => signOut()}>
+          <MaterialIcons name="logout" size={24} color="white" />
+        </TouchableOpacity>
+      </S.Header>
+      <Search onSearch={() => { }} onClear={() => { }} />
+    </S.Container>
+
+  )
+}
+
+{/* <Container>
       <S.HeaderHome>
         <S.WrapperTitle>
           <S.SmalleTitle>😁</S.SmalleTitle>
@@ -25,6 +42,4 @@ export function Home() {
           <MaterialIcons name="search" size={24} color="white" />
         </S.ButtonSearch>
       </S.WrapperSearch>
-    </Container>
-  )
-}
+    </Container> */}

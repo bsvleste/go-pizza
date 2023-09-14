@@ -4,7 +4,7 @@ import * as S from './styles'
 import { TypeProps } from './styles'
 
 type Props = TextInputProps & {
-  type: TypeProps
+  type?: TypeProps
 }
 export function Input({ type = "primary", ...rest }: Props) {
   return (
