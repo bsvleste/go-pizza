@@ -1,14 +1,14 @@
-import React from "react";
-import { Container } from "@components/Container";
-import { TextInput, View, TouchableOpacity } from "react-native";
+import React, { useEffect, useState } from "react";
+import { TouchableOpacity, ScrollView, Alert, FlatList } from "react-native";
 import * as S from './styles'
 import { MaterialIcons } from '@expo/vector-icons';
 import { useAuth } from "@hooks/auth";
 import { Search } from "@components/Search";
 import smille from '@assets/happy.png'
-import { ProductCard } from "@components/ProductCard";
-import { ScrollView } from "react-native-gesture-handler";
+import { ProductCard, ProductProps } from "@components/ProductCard";
 
+import { collection, endAt, getDoc, onSnapshot, orderBy, query, startAt, where } from "firebase/firestore";
+import { firestore } from "@config/firebaseConfig";
 
 const data = {
   id: '1',
@@ -18,7 +18,37 @@ const data = {
 }
 export function Home() {
   const { signOut } = useAuth()
+  const [pizzas, setPizzas] = useState<ProductProps[]>([])
+  const [search, setSearch] = useState("")
+  async function fetchPizzas(value: string) {
+    try {
 
+      const formattedValue = value.toLocaleLowerCase().trim()
+      const pizzasRef = collection(firestore, "pizzas")
+      const queryPizza = query(pizzasRef, orderBy("name_insensitive"), startAt(formattedValue), endAt(`${formattedValue}\uf8ff`))
+      onSnapshot(queryPizza, (snapshot) => {
+        const data = snapshot.docs.map(doc => {
+          return {
+            id: doc.id,
+            ...doc.data(),
+          }
+        }) as ProductProps[]
+        setPizzas(data)
+      })
+    } catch (error) {
+      return Alert.alert("Error", "Não foi possivel carregar os dados")
+    }
+  }
+  async function handleSearch() {
+    fetchPizzas(search)
+  }
+  async function handleClearSearch() {
+    setSearch("")
+    fetchPizzas('')
+  }
+  useEffect(() => {
+    fetchPizzas(search)
+  }, [])
   return (
     <S.Container>
       <S.Header>
@@ -30,14 +60,27 @@ export function Home() {
           <MaterialIcons name="logout" size={24} color="white" />
         </TouchableOpacity>
       </S.Header>
-      <Search onSearch={() => { }} onClear={() => { }} />
+      <Search
+        onSearch={handleSearch}
+        onClear={handleClearSearch}
+        onChangeText={setSearch}
+        value={search}
+      />
       <S.MenuHeader>
         <S.MenuTitle>Cardapio</S.MenuTitle>
         <S.MenuItemsNumber>32 pizzas</S.MenuItemsNumber>
       </S.MenuHeader>
-      <ScrollView>
-        <ProductCard data={data} />
-      </ScrollView>
+      <FlatList
+        data={pizzas}
+        keyExtractor={item => item.id}
+        renderItem={({ item }) => <ProductCard data={item} />}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingTop: 20,
+          paddingBottom: 125,
+          marginHorizontal: 22
+        }}
+      />
     </S.Container>
   )
 }

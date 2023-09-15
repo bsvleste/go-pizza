@@ -11,7 +11,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 import { firestore, storage } from '@config/firebaseConfig';
 import { ref, uploadBytesResumable, getDownloadURL, uploadBytes } from "firebase/storage";
 import { addDoc, collection } from 'firebase/firestore';
-
+import { Blob } from 'buffer'
 export function Product() {
   const [image, setImage] = useState("")
   const [name, setName] = useState("")
@@ -35,15 +35,14 @@ export function Product() {
       return Alert.alert("Cadatro", "Informe o preço de todos os tamanhos de pizza.")
     }
     const fileName = new Date().getTime();
-    const imageRef = ref(storage,)
-    const reference = ref(imageRef, `/pizzas/${fileName}.png`)
+    const reference = ref(storage, `/pizzas/${fileName}.png`)
 
     try {
-
       setIsLoading(true)
-      await uploadBytes(reference, image)
-      const photo_url = await getDownloadURL(reference)
-
+      const img = await fetch(image)
+      const bytes = await img.blob()
+      const imageRef = await uploadBytes(reference, bytes)
+      const photo_url = await getDownloadURL(imageRef.ref);
       await addDoc(collection(firestore, 'pizzas'), {
         name,
         name_insensitive: name.toLowerCase().trim(),
@@ -77,6 +76,8 @@ export function Product() {
         aspect: [4, 4]
       })
       if (!result.canceled) {
+        const img = await fetch(result.assets[0].uri)
+        const bytes = await img.blob()
         setImage(result.assets[0].uri)
       }
     }
