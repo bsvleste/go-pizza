@@ -31,7 +31,7 @@ export default function App() {
       <SafeAreaProvider>
         <StatusBar style="light" backgroundColor={'#B83341'} translucent />
         <AuthProvider>
-          <Home />
+          <Routes />
         </AuthProvider>
       </SafeAreaProvider>
     </ThemeProvider>

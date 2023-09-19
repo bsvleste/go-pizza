@@ -1,5 +1,5 @@
-import React from 'react'
-import { RectButtonProps } from 'react-native-gesture-handler'
+import React, { useEffect } from 'react'
+import { TouchableOpacityProps } from 'react-native'
 import { Feather } from '@expo/vector-icons'
 import * as S from './styles'
 
@@ -11,9 +11,10 @@ export type ProductProps = {
   description: string
 }
 
-type Props = RectButtonProps & {
+type Props = TouchableOpacityProps & {
   data: ProductProps
 }
+
 export function ProductCard({ data, ...rest }: Props) {
   const { COLORS } = useTheme()
   return (

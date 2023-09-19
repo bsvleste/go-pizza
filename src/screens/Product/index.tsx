@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Platform, TouchableOpacity, Alert } from 'react-native'
 import * as S from './styles'
 import { ButtonBack } from '@components/ButtonBack';
@@ -8,13 +8,29 @@ import { InputPrice } from '@components/InputPrice';
 import { Input } from '@components/Input';
 import { Button } from '@components/Button';
 import { ScrollView } from 'react-native-gesture-handler';
-import { firestore, storage } from '@config/firebaseConfig';
-import { ref, uploadBytesResumable, getDownloadURL, uploadBytes } from "firebase/storage";
-import { addDoc, collection } from 'firebase/firestore';
-import { Blob } from 'buffer'
+import { auth, firestore, storage } from '@config/firebaseConfig';
+import { ref, getDownloadURL, uploadBytes, deleteObject } from "firebase/storage";
+import { addDoc, collection, deleteDoc, doc, getDoc, query } from 'firebase/firestore';
+import { useNavigation, useRoute } from '@react-navigation/native'
+import { ProductNavigationProps } from '@src/@types/navigation'
+import { ProductProps } from '@src/components/ProductCard';
+type PizzasResponse = ProductProps & {
+  photo_path: string;
+  prices_sizes: {
+    p: string
+    m: string
+    g: string
+  }
+}
+
 export function Product() {
+  const route = useRoute();
+  const { id } = route.params as ProductNavigationProps
+  console.log("Id do produto carregado", id);
+  const { navigate, goBack } = useNavigation()
   const [image, setImage] = useState("")
   const [name, setName] = useState("")
+  const [photo_path, setPhotoPath] = useState("")
   const [description, setDescription] = useState("")
   const [priceSizeP, setPriceSizeP] = useState("")
   const [priceSizeM, setPriceSizeM] = useState("")
@@ -61,11 +77,10 @@ export function Product() {
       setPriceSizeG("")
       setPriceSizeM("")
       setPriceSizeP("")
-      return Alert.alert("Sucesso", "Produto cadastrado com sucesso")
+      navigate('home')
     } catch (error) {
-      return Alert.alert("Error", "Não foi possivel cadastrar")
-    } finally {
       setIsLoading(false);
+      return Alert.alert("Error", "Não foi possivel cadastrar")
     }
   }
   async function handlerPickerImage() {
@@ -82,20 +97,65 @@ export function Product() {
       }
     }
   }
+  async function handleGetPizzaById() {
+    if (id) {
+      const pizzasRef = doc(firestore, "pizzas", id)
+      const product = await getDoc(pizzasRef)
+      const pizzas = product.data() as PizzasResponse
+      setName(pizzas.name)
+      setDescription(pizzas.description)
+      setImage(pizzas.photo_url)
+      setPriceSizeG(pizzas.prices_sizes.g)
+      setPriceSizeM(pizzas.prices_sizes.m)
+      setPriceSizeP(pizzas.prices_sizes.p)
+      setPhotoPath(pizzas.photo_path)
+    }
+  }
+  function handleDeletePizza() {
+    if (id) {
+      const pizzasRef = doc(firestore, "pizzas", id)
+      deleteDoc(pizzasRef)
+        .then(() => {
+          const reference = ref(storage, photo_path)
+          deleteObject(reference).then(() => {
+            // File deleted successfully
+            navigate("home")
+          }).catch((error) => {
+            // Uh-oh, an error occurred!
+            Alert.alert("Foto", "Não foi possivel deletar a foto")
+          });
+
+        })
+        .catch(() => {
+          Alert.alert("Deletar",
+            'Ops!,🤡 Ocorreu um erro e não foi possivel deletar o placar',
+          )
+        })
+    }
+  }
+  useEffect(() => {
+    handleGetPizzaById()
+  }, [id])
   return (
     <S.Container behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView showsVerticalScrollIndicator={false}>
-
         <S.Header>
-          <ButtonBack />
+          <ButtonBack onPress={() => goBack()} />
           <S.Title>Cadastrar Pizza</S.Title>
-          <TouchableOpacity>
-            <S.DeleteLabel>Deletar</S.DeleteLabel>
+          <TouchableOpacity onPress={handleDeletePizza}>
+            {
+              id ?
+                <S.DeleteLabel>Deletar</S.DeleteLabel>
+                :
+                <View style={{ width: 40 }} />
+            }
           </TouchableOpacity>
         </S.Header>
         <S.Upload>
           <Photo uri={image} />
-          <S.PickImageButton title='Carregar' type='SECONDARY' onPress={handlerPickerImage} />
+          {!id &&
+            <S.PickImageButton title='Carregar' type='SECONDARY' onPress={handlerPickerImage} />
+          }
         </S.Upload>
         <S.Form>
           <S.InputGroup>
@@ -120,7 +180,9 @@ export function Product() {
             <InputPrice size='M' onChangeText={setPriceSizeM} value={priceSizeM} />
             <InputPrice size='G' onChangeText={setPriceSizeG} value={priceSizeG} />
           </S.InputGroup>
-          <Button title="Cadastar" onPress={handleAddPizza} isLoading={isLoading} />
+          {
+            !id && <Button title="Cadastar" onPress={handleAddPizza} isLoading={isLoading} />
+          }
         </S.Form>
       </ScrollView>
     </S.Container>

@@ -28,7 +28,7 @@ export const Input = styled(TextInput)`
 `
 
 export const ButtonClear = styled.TouchableOpacity`
-  margin-left: 7px;
+  margin-right: 8px;
 `
 export const Button = styled(TouchableOpacity)`
   width: 52px;
