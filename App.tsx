@@ -11,6 +11,7 @@ import { SignIn } from '@screens/SignIn';
 import { AuthProvider, useAuth } from '@hooks/auth';
 import { Product } from '@screens/Product';
 import { Home } from '@screens/Home';
+import { Order } from '@src/screens/Order';
 export default function App() {
   const { user } = useAuth();
   const [fontsLoaded] = useFonts({
@@ -31,7 +32,7 @@ export default function App() {
       <SafeAreaProvider>
         <StatusBar style="light" backgroundColor={'#B83341'} translucent />
         <AuthProvider>
-          <Routes />
+          <Order />
         </AuthProvider>
       </SafeAreaProvider>
     </ThemeProvider>
