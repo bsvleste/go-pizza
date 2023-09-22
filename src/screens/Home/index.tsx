@@ -11,7 +11,7 @@ import { firestore } from "@config/firebaseConfig";
 import { useNavigation, useFocusEffect } from "@react-navigation/native"
 
 export function Home() {
-  const { signOut } = useAuth()
+  const { signOut, user } = useAuth()
   const { navigate } = useNavigation();
   const [pizzas, setPizzas] = useState<ProductProps[]>([])
   const [search, setSearch] = useState("")
@@ -41,7 +41,8 @@ export function Home() {
     fetchPizzas('')
   }
   function handleOpen(id: string) {
-    navigate("product", { id });
+    const route = user?.isAdmin ? "product" : "order"
+    navigate(route, { id });
   }
   function handleAdd() {
     navigate('product', {})
@@ -86,7 +87,9 @@ export function Home() {
           marginHorizontal: 22
         }}
       />
-      <S.NewProduct title="Cadastrar nova Pizza" type="SECONDARY" onPress={handleAdd} />
+      {user?.isAdmin &&
+        <S.NewProduct title="Cadastrar nova Pizza" type="SECONDARY" onPress={handleAdd} />
+      }
     </S.Container>
   )
 }

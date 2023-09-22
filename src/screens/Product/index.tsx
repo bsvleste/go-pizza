@@ -14,6 +14,7 @@ import { addDoc, collection, deleteDoc, doc, getDoc, query } from 'firebase/fire
 import { useNavigation, useRoute } from '@react-navigation/native'
 import { ProductNavigationProps } from '@src/@types/navigation'
 import { ProductProps } from '@src/components/ProductCard';
+import { useAuth } from '@src/hooks/auth';
 type PizzasResponse = ProductProps & {
   photo_path: string;
   prices_sizes: {
@@ -25,8 +26,8 @@ type PizzasResponse = ProductProps & {
 
 export function Product() {
   const route = useRoute();
+
   const { id } = route.params as ProductNavigationProps
-  console.log("Id do produto carregado", id);
   const { navigate, goBack } = useNavigation()
   const [image, setImage] = useState("")
   const [name, setName] = useState("")
